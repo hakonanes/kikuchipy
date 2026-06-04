@@ -13,6 +13,15 @@ its best to adhere to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>
 List entries are sorted in descending chronological order. Contributors to each release
 were listed in alphabetical order by first name until version 0.7.0.
 
+0.12.2 (2026-06-04)
+===================
+
+Fixed
+-----
+- Overflow error when loading EDAX binary up1/up2 files greater than ~4 GB.
+  (`#804 <https://github.com/pyxem/kikuchipy/pull/804>`_)
+
+
 0.12.1 (2026-05-30)
 ===================
 

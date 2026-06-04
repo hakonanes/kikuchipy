@@ -1,4 +1,5 @@
-# Copyright 2019-2024 The kikuchipy developers
+#
+# Copyright 2019-2026 the kikuchipy developers
 #
 # This file is part of kikuchipy.
 #
@@ -14,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
+#
 
 """Reader of EBSD data from EDAX TSL UP1/2 files.
 
@@ -110,7 +112,10 @@ class EDAXBinaryFileReader:
     def read_header(self) -> dict[str, int]:
         """Return read header information."""
         self.file.seek(4)
-        sx, sy, pattern_offset = np.fromfile(self.file, "uint32", count=3)
+        sx, sy, pattern_offset = tuple(
+            map(int, np.fromfile(self.file, "uint32", count=3))
+        )
+
         file_size = Path(self.file.name).stat().st_size
 
         if self.version == 1:
@@ -120,7 +125,7 @@ class EDAXBinaryFileReader:
             dx, dy = 1, 1
             is_hex = False
         else:  # Version >= 3
-            nx, ny = np.fromfile(self.file, "uint32", 2, offset=1)
+            nx, ny = tuple(map(int, np.fromfile(self.file, "uint32", 2, offset=1)))
 
             is_hex = np.fromfile(self.file, "uint8", 1)[0]
             is_hex = bool(is_hex)
