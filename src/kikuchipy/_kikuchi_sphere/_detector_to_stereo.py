@@ -17,10 +17,13 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
+"""Functions for projecting from the detector to the unit sphere."""
+
 import numba as nb
 import numpy as np
 import orix.quaternion as oqu
 
+from kikuchipy._kikuchi_sphere._interpolation import _bilinear_lookup
 from kikuchipy.detectors._ebsd_detector import EBSDDetector
 
 
@@ -64,7 +67,7 @@ def _get_unit_sphere_vectors(
 
 
 def _combine_transformations(
-    rot_s2c: oqu.Rotation, detector: EBSDDetector
+    rot_s2c: oqu.Orientation | oqu.Rotation | oqu.Quaternion, detector: EBSDDetector
 ) -> np.ndarray:
     """Return the (3, 3) matrix mapping crystal unit vectors to the
     detector frame: v_det = rotm @ v_crystal.
@@ -188,17 +191,12 @@ def _project_detector_to_sphere(
             continue
 
         # Bilinear interpolation on the regular detector grid
-        r0 = int(row_frac)
-        c0 = int(col_frac)
-        r1 = r0 + 1 if r0 + 1 < nrows else r0
-        c1 = c0 + 1 if c0 + 1 < ncols else c0
-        dr = row_frac - r0
-        dc = col_frac - c0
-        out[i] = (
-            (1.0 - dr) * (1.0 - dc) * pattern[r0, c0]
-            + (1.0 - dr) * dc * pattern[r0, c1]
-            + dr * (1.0 - dc) * pattern[r1, c0]
-            + dr * dc * pattern[r1, c1]
+        out[i] = _bilinear_lookup(
+            image=pattern,
+            row_frac=row_frac,
+            col_frac=col_frac,
+            nrows=nrows,
+            ncols=ncols,
         )
 
     return out
@@ -267,7 +265,7 @@ def _normalize_accumulator(accumulator: np.ndarray, counts: np.ndarray) -> np.nd
 def _detector_to_stereo(
     pattern: np.ndarray,
     detector: EBSDDetector,
-    rot_s2c: oqu.Rotation,
+    rot_s2c: oqu.Orientation | oqu.Rotation | oqu.Quaternion,
     n: int = 1001,
 ) -> np.ndarray:
     """Return a pattern on a flat EBSD detector projected onto the
@@ -340,8 +338,7 @@ def _detector_to_stereo(
 def _detector_to_stereo_symmetrized(
     pattern: np.ndarray,
     detector: EBSDDetector,
-    rot_s2c: oqu.Rotation,
-    symmetry: oqu.Symmetry,
+    ori_s2c: oqu.Orientation,
     n: int = 1001,
 ) -> np.ndarray:
     """Return the symmetry-averaged stereographic projection over all
@@ -353,10 +350,9 @@ def _detector_to_stereo_symmetrized(
         2D detector image of shape (nrows, ncols).
     detector
         EBSD detector with a single PC.
-    rot_s2c
-        Rotation transforming vectors from the sample to the crystal.
-    symmetry
-        Crystal symmetry whose proper subgroup operators are applied.
+    ori_s2c
+        Orientation transforming vectors from the sample to the crystal,
+        with a valid symmetry set.
     n
         Side length of the square output grid. Default is 1001.
 
@@ -389,11 +385,11 @@ def _detector_to_stereo_symmetrized(
     # Overwritten in every iteration
     partial_sphere = np.empty((2, n * n), dtype=np.float64)
 
-    sym_ops = symmetry.proper_subgroup
+    sym_ops = ori_s2c.symmetry.proper_subgroup
     for sym_op in sym_ops:
         # Symmetrically equivalent rotation (applied in the crystal).
         # Inverted and rotation matrix extracted.
-        rotm_c2s_eq = (~(sym_op * rot_s2c)).to_matrix().squeeze()
+        rotm_c2s_eq = (~(sym_op * ori_s2c)).to_matrix().squeeze()
         # Detector <- sample <- crystal
         rotm_c2d = np.ascontiguousarray(rotm_s2d @ rotm_c2s_eq)
 

@@ -28,6 +28,7 @@ import pytest
 
 import kikuchipy as kp
 from kikuchipy._constants import dependency_version
+from kikuchipy._kikuchi_sphere._lambert_projection import _lambert_to_sphere
 from kikuchipy._utils.numba import rotate_vector
 from kikuchipy.signals.util._master_pattern import (
     _get_direction_cosines_for_fixed_pc,
@@ -35,7 +36,6 @@ from kikuchipy.signals.util._master_pattern import (
     _get_direction_cosines_from_detector,
     _get_lambert_interpolation_parameters,
     _get_pixel_from_master_pattern,
-    _lambert2vector,
     _project_patterns_from_master_pattern_with_fixed_pc,
     _project_patterns_from_master_pattern_with_varying_pc,
     _project_single_pattern_from_master_pattern,
@@ -632,7 +632,7 @@ class TestAsLambert:
         x_lambert_flat = x_lambert.ravel()
         y_lambert_flat = y_lambert.ravel()
 
-        xyz = _lambert2vector.py_func(x_lambert_flat, y_lambert_flat)
+        xyz = _lambert_to_sphere.py_func(x_lambert_flat, y_lambert_flat)
 
         assert xyz.shape == (arr.size**2, 3)
         assert np.all(xyz[:, 2] >= 0)

@@ -17,20 +17,22 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from copy import deepcopy
 import logging
 from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 import hyperspy.api as hs
 import numpy as np
-from orix.crystal_map import Phase
-from orix.projections import InverseStereographicProjection, StereographicProjection
-from orix.vector import Vector3d
-from scipy.interpolate import interpn
+import orix.crystal_map as ocm
+import orix.projections as opr
+import orix.vector as ove
 from tqdm import tqdm
 
 from kikuchipy._constants import verify_dependency_or_raise
+from kikuchipy._kikuchi_sphere._lambert_projection import (
+    _lambert_to_stereo_coords,
+    _project_stereo_to_lambert,
+)
 from kikuchipy._utils.vector import (
     ValidHemispheres,
     ValidProjections,
@@ -38,7 +40,6 @@ from kikuchipy._utils.vector import (
     parse_projection,
 )
 from kikuchipy.signals._kikuchipy_signal import KikuchipySignal2D
-from kikuchipy.signals.util._master_pattern import _lambert2vector
 from kikuchipy.signals.util._overwrite_hyperspy_methods import insert_doc_disclaimer
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -76,7 +77,7 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._hemisphere = kwargs.get("hemisphere")
-        self._phase = kwargs.get("phase", Phase())
+        self._phase = kwargs.get("phase", ocm.Phase())
         self._projection = kwargs.get("projection")
 
     @property
@@ -101,7 +102,7 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
         self._hemisphere = parse_hemisphere(value)
 
     @property
-    def phase(self) -> Phase:
+    def phase(self) -> ocm.Phase:
         """Return or set the phase describing the crystal structure used
         in the master pattern simulation.
 
@@ -113,7 +114,7 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
         return self._phase
 
     @phase.setter
-    def phase(self, value: Phase) -> None:
+    def phase(self, value: ocm.Phase) -> None:
         self._phase = value
 
     @property
@@ -163,54 +164,37 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
         if self._lazy is True:
             raise NotImplementedError("Only implemented for non-lazy signals")
 
-        # Set up square arrays
         sig_shape = self._signal_shape_rc
-        arr = np.linspace(-1, 1, sig_shape[0], dtype=np.float64)
-        x_lambert, y_lambert = np.meshgrid(arr, arr)
-        x_lambert_flat = x_lambert.ravel()
-        y_lambert_flat = y_lambert.ravel()
+        n = sig_shape[0]
 
-        # Get unit vectors per array coordinate, and then the
-        # corresponding (X, Y) coordinate in the stereographic
-        # projection
-        xyz_upper = _lambert2vector(x_lambert_flat, y_lambert_flat)
-        v = Vector3d(xyz_upper)
-        sp = StereographicProjection()
-        x_stereo, y_stereo = sp.vector2xy(v)
-        x_stereo += 1
-        y_stereo += 1
-
-        # Keyword arguments for interpolation
-        kwargs = {
-            "points": (arr + 1, arr + 1),
-            "xi": (y_stereo, x_stereo),
-            "method": "splinef2d",
-        }
+        # Precompute once: for each Lambert output pixel, the fractional
+        # row/column in the stereographic input image
+        row_frac, col_frac = _lambert_to_stereo_coords(n)
 
         nav_shape = self.axes_manager.navigation_shape
         data_out = np.zeros(self.data.shape, dtype=np.float32)
-
-        n_iterations = self.axes_manager.navigation_size
-        if n_iterations == 0:
-            n_iterations = 1
 
         iterable = np.ndindex(nav_shape[::-1])
         if show_progressbar or (
             show_progressbar is None and hs.preferences.General.show_progressbar
         ):
+            n_iterations = min(self.axes_manager.navigation_size, 1)
             iterable = tqdm(iterable, total=n_iterations)
 
         for idx in iterable:
-            data_i = interpn(values=self.data[idx], **kwargs)
-            data_out[idx] = data_i.reshape(sig_shape)
+            lam = _project_stereo_to_lambert(self.data[idx], row_frac, col_frac)
+            lam = lam.reshape(sig_shape)
+            data_out[idx] = lam
 
-        return self.__class__(
+        new = self.__class__(
             data_out,
             axes=list(self.axes_manager.as_dictionary().values()),
             phase=self.phase.deepcopy(),
             projection="lambert",
-            hemisphere=deepcopy(self.hemisphere),
+            hemisphere=self.hemisphere,
         )
+
+        return new
 
     def plot_spherical(
         self,
@@ -286,11 +270,11 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
         x, y = np.meshgrid(np.linspace(-1, 1, size), np.linspace(-1, 1, size))
         x = x[keep]
         y = y[keep]
-        stereo2sphere = InverseStereographicProjection()
+        stereo2sphere = opr.InverseStereographicProjection()
         v1 = stereo2sphere.xy2vector(x.ravel(), y.ravel())
         stereo2sphere.pole = 1
         v2 = stereo2sphere.xy2vector(x.ravel(), y.ravel())
-        v3 = Vector3d.stack((v1, v2)).flatten()
+        v3 = ove.Vector3d.stack((v1, v2)).flatten()
 
         grid = pv.StructuredGrid(v3.x, v3.y, v3.z)
         grid.point_data["Intensity"] = data
