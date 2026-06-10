@@ -52,10 +52,8 @@ dependencies = [
     "numba            >= 0.57",
     "numpy            >= 1.23.0",
     # TODO: Replace with released version once it's released.
-    # Remember to remove the permission for Hatch to install
-    # dependencies from direct references.
-    # "orix             >= 0.12.1",
-    "orix @ git+https://github.com/hakonanes/orix@fix-misorientation-reduce-v2",
+    # "orix             >= 0.15.0",
+    "orix             == 0.15.0rc1",
     "packaging",
     "pyyaml",
     "rosettasciio     >= 0.3.0",
@@ -146,9 +144,6 @@ include = ["src/kikuchipy"]
 [tool.hatch.build.targets.wheel.force-include]
 "tests/" = "kikuchipy/tests"
 "conftest.py" = "kikuchipy/conftest.py"
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
 [tool.coverage.report]
 precision = 2
