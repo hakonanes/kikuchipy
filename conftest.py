@@ -51,9 +51,6 @@ from kikuchipy.data._dummy_files.bruker_h5ebsd import (
     create_dummy_bruker_h5ebsd_nonrectangular_roi_file,
     create_dummy_bruker_h5ebsd_roi_file,
 )
-from kikuchipy.data._dummy_files.ebsdsim_master_pattern_npz import (
-    create_small_ebsdsim_npz_file,
-)
 from kikuchipy.data._dummy_files.oxford_h5ebsd import create_dummy_oxford_h5ebsd_file
 from kikuchipy.draw._vtk import system_supports_plotting
 from kikuchipy.io.plugins._h5ebsd import _dict2hdf5group
@@ -605,6 +602,10 @@ def ebsdsim_master_pattern_file(tmp_path_factory) -> Generator[Path, None, None]
     """Minimal ebsdsim Ni master pattern .npz file, created once per
     session.
     """
+    from kikuchipy.data._dummy_files.ebsdsim_master_pattern_npz import (
+        create_small_ebsdsim_npz_file,
+    )
+
     fpath = tmp_path_factory.mktemp("ebsdsim") / "ni_master_pattern.npz"
     create_small_ebsdsim_npz_file(fpath)
     yield fpath
