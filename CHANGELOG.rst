@@ -24,6 +24,8 @@ Added
   (`#796 <https://github.com/pyxem/kikuchipy/pull/796>`_)
 - Function to clear the kikuchipy data cache directory.
   (`#796 <https://github.com/pyxem/kikuchipy/pull/796>`_)
+- Project master pattern from the Lambert to the stereographic projection.
+  (`#807 <https://github.com/pyxem/kikuchipy/pull/807>`_)
 
 Changed
 -------

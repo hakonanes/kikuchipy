@@ -27,11 +27,14 @@ import orix.crystal_map as ocm
 import orix.projections as opr
 import orix.vector as ove
 from tqdm import tqdm
+from typing_extensions import Self
 
 from kikuchipy._constants import verify_dependency_or_raise
 from kikuchipy._kikuchi_sphere._lambert_projection import (
     _lambert_to_stereo_coords,
+    _project_lambert_to_stereo,
     _project_stereo_to_lambert,
+    _stereo_to_lambert_coords,
 )
 from kikuchipy._utils.vector import (
     ValidHemispheres,
@@ -76,16 +79,14 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._hemisphere = kwargs.get("hemisphere")
+        self._hemisphere: ValidHemispheres | None = kwargs.get("hemisphere")
         self._phase = kwargs.get("phase", ocm.Phase())
-        self._projection = kwargs.get("projection")
+        self._projection: ValidProjections | None = kwargs.get("projection")
+
+    # -------------------------- Properties -------------------------- #
 
     @property
-    def _has_multiple_energies(self) -> bool:
-        return "energy" in [i.name for i in self.axes_manager.navigation_axes]
-
-    @property
-    def hemisphere(self) -> str:
+    def hemisphere(self) -> ValidHemispheres | None:
         """Return or set which hemisphere(s) the signal contains.
 
         Options are "upper", "lower", or "both".
@@ -118,7 +119,7 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
         self._phase = value
 
     @property
-    def projection(self) -> str:
+    def projection(self) -> ValidProjections | None:
         """Return or set which projection the pattern is in.
 
         Parameters
@@ -133,7 +134,13 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
     def projection(self, value: ValidProjections) -> None:
         self._projection = parse_projection(value)
 
-    def as_lambert(self, show_progressbar: bool | None = None) -> Any:
+    @property
+    def _has_multiple_energies(self) -> bool:
+        return "energy" in [i.name for i in self.axes_manager.navigation_axes]
+
+    # --------------------------- Methods ---------------------------- #
+
+    def as_lambert(self, show_progressbar: bool | None = None) -> Self:
         """Return a new master pattern in the Lambert projection
         :cite:`callahan2013dynamical`.
 
@@ -144,18 +151,6 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
         lambert_master_pattern
             Master pattern in the Lambert projection with the same data
             shape but in 32-bit floating point data dtype.
-
-        Examples
-        --------
-        >>> import hyperspy.api as hs
-        >>> import kikuchipy as kp
-        >>> mp_sp = kp.data.nickel_ebsd_master_pattern_small()
-        >>> mp_sp.projection
-        'stereographic'
-        >>> mp_lp = mp_sp.as_lambert()
-        >>> mp_lp.projection
-        'lambert'
-        >>> _ = hs.plot.plot_images([mp_sp, mp_lp], per_row=2)
         """
         if self.projection == "lambert":
             warn("Already in the Lambert projection, returning a deepcopy", UserWarning)
@@ -191,6 +186,60 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
             axes=list(self.axes_manager.as_dictionary().values()),
             phase=self.phase.deepcopy(),
             projection="lambert",
+            hemisphere=self.hemisphere,
+        )
+
+        return new
+
+    def as_stereo(self, show_progressbar: bool | None = None) -> Self:
+        """Return a new master pattern in the stereographic projection
+        :cite:`callahan2013dynamical`.
+
+        Only implemented for non-lazy signals.
+
+        Returns
+        -------
+        stereo_master_pattern
+            Master pattern in the stereographic projection with the same
+            data shape but in 32-bit floating point data dtype.
+        """
+        if self.projection == "stereographic":
+            warn(
+                "Already in the stereographic projection, returning a deepcopy",
+                UserWarning,
+            )
+            return self.deepcopy()
+
+        if self._lazy is True:
+            raise NotImplementedError("Only implemented for non-lazy signals")
+
+        sig_shape = self._signal_shape_rc
+        n = sig_shape[0]
+
+        # Precompute once: for each stereographic output pixel, the
+        # fractional row/column in the Lambert input image
+        row_frac, col_frac = _stereo_to_lambert_coords(n)
+
+        nav_shape = self.axes_manager.navigation_shape
+        data_out = np.zeros(self.data.shape, dtype=np.float32)
+
+        iterable = np.ndindex(nav_shape[::-1])
+        if show_progressbar or (
+            show_progressbar is None and hs.preferences.General.show_progressbar
+        ):
+            n_iterations = min(self.axes_manager.navigation_size, 1)
+            iterable = tqdm(iterable, total=n_iterations)
+
+        for idx in iterable:
+            sp = _project_lambert_to_stereo(self.data[idx], row_frac, col_frac)
+            sp = sp.reshape(sig_shape)
+            data_out[idx] = sp
+
+        new = self.__class__(
+            data_out,
+            axes=list(self.axes_manager.as_dictionary().values()),
+            phase=self.phase.deepcopy(),
+            projection="stereographic",
             hemisphere=self.hemisphere,
         )
 
@@ -295,6 +344,49 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
                 show_kwargs = {}
             pl.show(**show_kwargs)
 
+    # ----- Inherited methods from KikuchipySignal2D overwritten ----- #
+
+    def deepcopy(self) -> Any:
+        """Return a deep copy using :func:`copy.deepcopy`.
+
+        Returns
+        -------
+        s_new
+            Identical signal without shared memory.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import kikuchipy as kp
+        >>> mp = kp.data.nickel_ebsd_master_pattern_small()
+        >>> mp2 = mp.deepcopy()
+        >>> np.may_share_memory(mp.data, mp2.data)
+        False
+        """
+        return super().deepcopy()
+
+    # --------- Inherited methods from Signal2D overwritten ---------- #
+
+    @insert_doc_disclaimer(
+        cls=hs.signals.Signal2D, meth=hs.signals.Signal2D.set_signal_type
+    )
+    def set_signal_type(self, signal_type: str = "") -> None:
+        if "master" in signal_type.lower():
+            attrs = self._get_custom_attributes()
+            super().set_signal_type(signal_type)
+            self._set_custom_attributes(attrs)
+        else:
+            attrs = self._custom_attributes
+            super().set_signal_type(signal_type)
+            _logger.debug("Delete custom attributes when setting signal type")
+            for name in attrs:
+                try:
+                    self.__delattr__("_" + name)
+                except AttributeError:  # pragma: no cover
+                    pass
+
+    # ------------------------ Private methods ----------------------- #
+
     def _get_master_pattern_arrays_from_energy(
         self, energy: int | float | None = None
     ) -> tuple[np.ndarray, np.ndarray]:
@@ -327,44 +419,3 @@ class KikuchiMasterPattern(KikuchipySignal2D, hs.signals.Signal2D):
         else:
             master_upper = master_lower = master_patterns
         return master_upper, master_lower
-
-    # --- Inherited methods from KikuchipySignal2D overwritten
-
-    def deepcopy(self) -> Any:
-        """Return a deep copy using :func:`copy.deepcopy`.
-
-        Returns
-        -------
-        s_new
-            Identical signal without shared memory.
-
-        Examples
-        --------
-        >>> import numpy as np
-        >>> import kikuchipy as kp
-        >>> mp = kp.data.nickel_ebsd_master_pattern_small()
-        >>> mp2 = mp.deepcopy()
-        >>> np.may_share_memory(mp.data, mp2.data)
-        False
-        """
-        return super().deepcopy()
-
-    # --- Inherited methods from Signal2D overwritten
-
-    @insert_doc_disclaimer(
-        cls=hs.signals.Signal2D, meth=hs.signals.Signal2D.set_signal_type
-    )
-    def set_signal_type(self, signal_type: str = "") -> None:
-        if "master" in signal_type.lower():
-            attrs = self._get_custom_attributes()
-            super().set_signal_type(signal_type)
-            self._set_custom_attributes(attrs)
-        else:
-            attrs = self._custom_attributes
-            super().set_signal_type(signal_type)
-            _logger.debug("Delete custom attributes when setting signal type")
-            for name in attrs:
-                try:
-                    self.__delattr__("_" + name)
-                except AttributeError:  # pragma: no cover
-                    pass
