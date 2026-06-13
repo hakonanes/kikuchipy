@@ -83,8 +83,12 @@ MARKERS = [
 
 
 def pytest_runtest_setup(item):
-    # Skip certain tests when flag is missing:
-    # https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_runtest_setup
+    """Skip certain tests when flag is missing:
+    https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_runtest_setup.
+
+    To run tests marked by this marker *only*, say, `gpu`, do
+    `pytest -m gpu --gpu`.
+    """
     for marker in MARKERS:
         marker_str = f"--{marker}"
         if marker in item.keywords and not item.config.getoption(
