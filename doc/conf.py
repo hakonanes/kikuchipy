@@ -375,7 +375,7 @@ sphinx_gallery_conf = {
     "gallery_dirs": "examples",
     "reference_url": {"kikuchipy": None},
     "run_stale_examples": False,
-    "show_memory": True,
+    "show_memory": False,  # Takes too long time
 }
 autosummary_generate = True
 
