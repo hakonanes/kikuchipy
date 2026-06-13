@@ -99,6 +99,10 @@ def file_reader(
     -------
     signal_dict_list
         Data, axes, metadata, original metadata, and a phase dict.
+
+    Notes
+    -----
+    This function carries a BSD 3-Clause license.
     """
     hemi = hemisphere.lower()
     hemi_options = get_args(HEMISPHERE)
