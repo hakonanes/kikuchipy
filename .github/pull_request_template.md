@@ -18,6 +18,7 @@
 
 #### For reviewers
 <!-- Don't remove the checklist below. -->
+- [ ] Files with a BSD 3-Clause license do not import from GPLv3+ software.
 - [ ] The PR title is short, concise, and will make sense 1 year later.
 - [ ] New functions are imported in corresponding `__init__.py`.
 - [ ] New features, API changes, and deprecations are mentioned in the unreleased
