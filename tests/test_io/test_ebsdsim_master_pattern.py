@@ -28,6 +28,7 @@ import kikuchipy as kp
 from kikuchipy.io.plugins.ebsdsim_master_pattern import file_reader
 
 
+@pytest.mark.gpu
 class TestEbsdsimMasterPatternReader:
     # The Ni file has halfw=10 (side=21), 2 energy bins ([15, 5] keV),
     # and hemisphere_dim=1 (centrosymmetric → only northern hemisphere stored).
