@@ -69,7 +69,7 @@ dependencies = [
 
 [project.optional-dependencies]
 all = [
-    "ebsdsim",
+    "ebsdsim @ git+https://github.com/hakonanes/ebsdsim@fix-1-multiprocessing-start-method-with-script",
     "ipywidgets",
     "IPython",
     "nlopt",
