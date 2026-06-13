@@ -17,6 +17,8 @@
 ## along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+exclude: ^\.github/pull_request_template.md
+
 repos:
   # https://docs.astral.sh/ruff/configuration
   - repo: https://github.com/astral-sh/ruff-pre-commit
