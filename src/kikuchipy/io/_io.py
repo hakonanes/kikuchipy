@@ -188,7 +188,7 @@ def _dict2signal(
 
     if "phase" in signal_dict and isinstance(signal_dict["phase"], dict):
         try:
-            signal_dict["phase"] = ocm.Phase(**signal_dict["phase_dict"])
+            signal_dict["phase"] = ocm.Phase(**signal_dict["phase"])
         except Exception as err:
             _logger.debug(
                 "An error was raised when trying to parse phase information from the "

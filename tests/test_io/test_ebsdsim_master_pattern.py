@@ -25,6 +25,7 @@ _ = pytest.importorskip("ebsdsim", reason="ebsdsim is not installed")
 import numpy as np
 
 import kikuchipy as kp
+from kikuchipy.io.plugins.ebsdsim_master_pattern import file_reader
 
 
 class TestEbsdsimMasterPatternReader:
@@ -88,8 +89,6 @@ class TestEbsdsimMasterPatternReader:
             kp.load(ebsdsim_master_pattern_file, hemisphere="north")
 
     def test_file_reader_returns_list(self, ebsdsim_master_pattern_file):
-        from kikuchipy.io.plugins.ebsdsim_master_pattern import file_reader
-
         result = file_reader(ebsdsim_master_pattern_file)
 
         assert isinstance(result, list)
