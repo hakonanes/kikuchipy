@@ -16,13 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
+
 """
-===================================
-Stereographic to Lambert projection
-===================================
+=====================================
+Stereographic and Lambert projections
+=====================================
 
 This example shows how to project a :class:`~kikuchipy.signals.EBSDMasterPattern` from
-the stereographic projection to the square Lambert projection.
+the stereographic projection to the square Lambert projection and vice versa.
 Pattern matching requires a master pattern to be in the square Lambert projection.
 
 See :cite:`rosca2014anew` and :cite:`callahan2013dynamical` for details of the
@@ -49,4 +50,21 @@ mp_lam = mp_stereo.as_lambert()
 # Plot both.
 _ = hs.plot.plot_images(
     [mp_stereo, mp_lam], label=["Stereographic", "Lambert"], axes_decor="off"
+)
+
+# %%
+# Project back to the stereographic projection.
+mp_stereo2 = mp_lam.as_stereo()
+
+# Difference pattern
+mp_diff = mp_stereo - mp_stereo2
+
+# %%
+# Plot both stereographic projections.
+_ = hs.plot.plot_images(
+    [mp_stereo, mp_stereo2, mp_diff],
+    cmap=["gray", "gray", "seismic"],
+    label=["Stereographic", "Stereo->Lambert->Stereo", "Difference"],
+    axes_decor="off",
+    tight_layout=True,
 )
