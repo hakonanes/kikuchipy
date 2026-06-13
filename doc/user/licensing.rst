@@ -4,9 +4,11 @@ Licensing
 
 kikuchipy is licensed under the `GNU General Public License v3+
 <https://opensource.org/license/GPL-3.0>`__.
-Select components are individually licensed under the `BSD 3-Clause License
-<https://opensource.org/license/BSD-3-Clause>`__, allowing reuse *of those components
-only* in both GPL and non-GPL projects.
+Select parts of the public API are individually licensed under the `BSD 3-Clause License
+<https://opensource.org/license/BSD-3-Clause>`__, allowing reuse *of those parts only*
+in both GPL and non-GPL projects.
+The parts of the API licensed under BSD are marked as such in the
+:doc:`/reference/index`.
 
 Our licenses can be found here:
 
