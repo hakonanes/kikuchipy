@@ -9,6 +9,9 @@ name = "kikuchipy"
 authors = [{name = "kikuchipy developers"}]
 maintainers = [{name = "Håkon Wiik Ånes", email = "hwaanes@gmail.com"}]
 description = "Processing, simulating, and indexing of electron backscatter diffraction (EBSD) patterns"
+# TODO: Use once this syntax is picked up by 'pip show kikuchipy' after install
+# license-expression = "GPL-3.0-or-later AND BSD-3-Clause"
+# license-files = ["LICENSE", "LICENSE-BSD-3-Clause"]
 license = {file = "LICENSE"}
 readme = {file = "README.rst", content-type = "text/x-rst"}
 dynamic = ["version"]
@@ -23,6 +26,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering",
