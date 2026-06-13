@@ -186,10 +186,9 @@ def _dict2signal(
         if "Signal" in md and "signal_type" in md["Signal"]:
             signal_type = md["Signal"]["signal_type"]
 
-    phase_dict = signal_dict.pop("phase", None)
-    if phase_dict is not None:
+    if "phase" in signal_dict and isinstance(signal_dict["phase"], dict):
         try:
-            signal_dict["phase"] = ocm.Phase(**phase_dict)
+            signal_dict["phase"] = ocm.Phase(**signal_dict["phase_dict"])
         except Exception as err:
             _logger.debug(
                 "An error was raised when trying to parse phase information from the "
