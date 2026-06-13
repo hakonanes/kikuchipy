@@ -780,26 +780,27 @@ class TestFitPatternDetectorOrientation:
     detector orientations.
     """
 
-    detector = kp.detectors.EBSDDetector(
-        shape=(480, 640), px_size=50, pc=(20, 20, 15000), convention="emsoft4"
-    )
+    def setup_method(self):
+        self.detector = kp.detectors.EBSDDetector(
+            shape=(480, 640), px_size=50, pc=(20, 20, 15000), convention="emsoft4"
+        )
 
-    phase = kp.data.nickel_ebsd_master_pattern_small().phase
+        self.phase = kp.data.nickel_ebsd_master_pattern_small().phase
 
-    hkl = [(1, 1, 1), (2, 0, 0), (2, 2, 0), (3, 1, 1)]
+        self.hkl = [(1, 1, 1), (2, 0, 0), (2, 2, 0), (3, 1, 1)]
 
-    ref = ReciprocalLatticeVector(phase=phase, hkl=hkl)
-    ref = ref.symmetrise()
+        ref = ReciprocalLatticeVector(phase=self.phase, hkl=self.hkl)
+        self.ref = ref.symmetrise()
 
-    simulator = kp.simulations.KikuchiPatternSimulator(ref)
+        self.simulator = kp.simulations.KikuchiPatternSimulator(self.ref)
 
-    rotations = Rotation.from_euler([23, 14, 5], degrees=True)
+        self.rotations = Rotation.from_euler([23, 14, 5], degrees=True)
 
-    # Transformation from CSs to cartesian crystal reference frame CSc
-    u_o = rotations.to_matrix().squeeze()
+        # Transformation from CSs to cartesian crystal reference frame CSc
+        self.u_o = self.rotations.to_matrix().squeeze()
 
-    # Transformation from CSc to direct crystal reference frame CSk
-    u_a = phase.structure.lattice.base
+        # Transformation from CSc to direct crystal reference frame CSk
+        self.u_a = self.phase.structure.lattice.base
 
     def setup_detector_sim_and_u_os(self, tilt, azimuthal, twist):
         det = self.detector.deepcopy()
