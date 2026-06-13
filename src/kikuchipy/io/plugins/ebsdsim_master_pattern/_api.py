@@ -4,8 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-"""Reader for ebsdsim master patterns stored in NumPy .npz files."""
-
 from kikuchipy._constants import verify_dependency_or_raise
 
 verify_dependency_or_raise("ebsdsim", "Reading of an EBSD master pattern from ebsdsim")
@@ -86,7 +84,7 @@ def file_reader(
     Parameters
     ----------
     filename
-        Path to the *.npz file written by
+        Path to the .npz file written by
         :func:`ebsdsim.save_master_pattern`.
     hemisphere
         Which hemisphere to return: "upper" (default), "lower", or

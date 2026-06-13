@@ -17,8 +17,6 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""Reader of EBSD data from an EDAX TSL h5ebsd file."""
-
 from pathlib import Path
 
 import h5py
