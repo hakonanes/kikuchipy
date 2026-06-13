@@ -65,11 +65,19 @@ def pytest_addoption(parser):
     # Flags for optional markers. Markers requiring something (installed
     # dependency, e.g.) should not have a flag to still run them.
     parser.addoption(
-        "--weekly", action="store_true", help="Run tests that should run only weekly"
+        "--gpu",
+        action="store_true",
+        help="Run tests that should run only when wgpu has a GPU available",
+    )
+    parser.addoption(
+        "--weekly",
+        action="store_true",
+        help="Run tests that should run only weekly",
     )
 
 
 MARKERS = [
+    "gpu",
     "weekly",
 ]
 
