@@ -1,4 +1,5 @@
-# Copyright 2019-2024 The kikuchipy developers
+#
+# Copyright 2019-2026 the kikuchipy developers
 #
 # This file is part of kikuchipy.
 #
@@ -14,7 +15,27 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
+#
 
-# Many of these tests are inspired by the tests written for the block_file
-# reader/writer available in HyperSpy: https://github.com/hyperspy/hyperspy/
-# blob/RELEASE_next_minor/hyperspy/tests/io/test_blockfile.py
+"""Creation of a small EBSD master pattern simulation using ebsdsim for
+testing and IO documentation.
+"""
+
+from pathlib import Path
+
+import ebsdsim as es
+
+
+def create_small_ebsdsim_npz_file(path: Path) -> None:
+    mp = es.master_pattern_from_cif(
+        "Ni.cif",
+        halfw=10,
+        voltage_kv=20.0,
+        sigma_deg=70.0,
+        omega_deg=0.0,
+        energy_binwidth_keV=10.0,
+        mc_backend="surrogate",
+        rank=3,
+        dmin=0.2,
+    )
+    es.save_master_pattern(mp, path)

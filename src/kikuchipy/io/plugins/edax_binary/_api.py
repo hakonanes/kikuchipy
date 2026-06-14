@@ -17,11 +17,6 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""Reader of EBSD data from EDAX TSL UP1/2 files.
-
-The reader is adapted from the EDAX UP1/2 reader in PyEBSDIndex.
-"""
-
 from pathlib import Path
 from typing import BinaryIO
 import warnings

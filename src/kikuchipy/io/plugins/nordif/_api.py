@@ -17,8 +17,6 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""Reader and writer of EBSD patterns from a NORDIF binary file."""
-
 from io import TextIOWrapper
 import logging
 import os

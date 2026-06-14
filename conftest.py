@@ -30,7 +30,7 @@ from numbers import Number
 import os
 from pathlib import Path
 import tempfile
-from typing import Callable, Generator
+from typing import Callable, Generator, Literal
 
 import dask.array as da
 from diffpy.structure import Atom, Lattice, Structure
@@ -45,7 +45,7 @@ import pytest
 
 import kikuchipy as kp
 from kikuchipy._constants import dependency_version
-from kikuchipy.data._data import marshall
+from kikuchipy.data._data import get_fetching_pooch
 from kikuchipy.data._dummy_files.bruker_h5ebsd import (
     create_dummy_bruker_h5ebsd_file,
     create_dummy_bruker_h5ebsd_nonrectangular_roi_file,
@@ -65,18 +65,30 @@ def pytest_addoption(parser):
     # Flags for optional markers. Markers requiring something (installed
     # dependency, e.g.) should not have a flag to still run them.
     parser.addoption(
-        "--weekly", action="store_true", help="Run tests that should run only weekly"
+        "--gpu",
+        action="store_true",
+        help="Run tests that should run only when wgpu has a GPU available",
+    )
+    parser.addoption(
+        "--weekly",
+        action="store_true",
+        help="Run tests that should run only weekly",
     )
 
 
 MARKERS = [
+    "gpu",
     "weekly",
 ]
 
 
 def pytest_runtest_setup(item):
-    # Skip certain tests when flag is missing:
-    # https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_runtest_setup
+    """Skip certain tests when flag is missing:
+    https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_runtest_setup.
+
+    To run tests marked by this marker *only*, say, `gpu`, do
+    `pytest -m gpu --gpu`.
+    """
     for marker in MARKERS:
         marker_str = f"--{marker}"
         if marker in item.keywords and not item.config.getoption(
@@ -229,7 +241,7 @@ def dummy_background() -> Generator[np.ndarray, None, None]:
     yield np.array([5, 4, 5, 4, 3, 4, 4, 4, 3], dtype=np.uint8).reshape((3, 3))
 
 
-@pytest.fixture(params=[[(3, 3), (3, 3), False, np.float32]])
+@pytest.fixture
 def ebsd_with_axes_and_random_data(request) -> Generator[kp.signals.EBSD, None, None]:
     """EBSD signal with minimally defined axes and random data.
 
@@ -240,7 +252,10 @@ def ebsd_with_axes_and_random_data(request) -> Generator[kp.signals.EBSD, None, 
     lazy : bool
     dtype : numpy.dtype
     """
-    nav_shape, sig_shape, lazy, dtype = request.param
+    nav_shape, sig_shape, lazy, dtype = getattr(
+        request, "param", [(3, 3), (3, 3), False, np.float32]
+    )
+
     nav_ndim = len(nav_shape)
     sig_ndim = len(sig_shape)
     data_shape = nav_shape + sig_shape
@@ -287,12 +302,12 @@ def pc1() -> Generator[list[float], None, None]:
     yield [0.4210, 0.7794, 0.5049]
 
 
-@pytest.fixture(params=[[(1,), (60, 60)]])
+@pytest.fixture
 def detector(request, pc1) -> Generator[kp.detectors.EBSDDetector, None, None]:
     """An EBSD detector of a given shape with a number of PCs given by
     a navigation shape.
     """
-    nav_shape, sig_shape = request.param
+    nav_shape, sig_shape = getattr(request, "param", [(1,), (60, 60)])
     yield kp.detectors.EBSDDetector(
         shape=sig_shape,
         binning=8,
@@ -343,12 +358,12 @@ def get_single_phase_xmap(rotations) -> Generator[Callable, None, None]:
 # ---------------------------- IO fixtures --------------------------- #
 
 
-@pytest.fixture(params=["h5"])
+@pytest.fixture
 def save_path_hdf5(request, tmpdir) -> Generator[Path, None, None]:
     """Temporary file in a temporary directory for use when tests need
     to write, and sometimes read again, a signal to, and from, a file.
     """
-    ext = request.param
+    ext = getattr(request, "param", "h5")
     yield Path(tmpdir / f"patterns.{ext}")
 
 
@@ -379,7 +394,7 @@ def ni_small_axes_manager() -> Generator[dict, None, None]:
     yield axes_manager
 
 
-@pytest.fixture(params=[("_x{}y{}.tif", (3, 3))])
+@pytest.fixture
 def ebsd_directory(tmpdir, request) -> Generator[Path, None, None]:
     """Temporary directory with EBSD files as .tif, .png or .bmp files.
 
@@ -391,7 +406,7 @@ def ebsd_directory(tmpdir, request) -> Generator[Path, None, None]:
     s = kp.data.nickel_ebsd_small()
     s.unfold_navigation_space()
 
-    xy_pattern, nav_shape = request.param
+    xy_pattern, nav_shape = getattr(request, "param", ("_x{}y{}.tif", (3, 3)))
     y, x = np.indices(nav_shape)
     x = x.ravel()
     y = y.ravel()
@@ -412,6 +427,7 @@ def kikuchipy_h5ebsd_path() -> Generator[Path, None, None]:
 
 @pytest.fixture
 def nickel_ebsd_large_h5ebsd_renamed() -> Generator[Path, None, None]:
+    marshall = get_fetching_pooch()
     f1 = Path(marshall.path) / "data/nickel_ebsd_large/patterns.h5"
     f2 = f1.rename(f1.with_suffix(".bak"))
     yield f2
@@ -426,7 +442,7 @@ def edax_binary_path() -> Generator[Path, None, None]:
     yield DATA_PATH / "edax_binary"
 
 
-@pytest.fixture(params=[(1, (2, 3), (60, 60), "uint8", 2, False)])
+@pytest.fixture
 def edax_binary_file(tmpdir, request) -> Generator[TextIOWrapper, None, None]:
     """Create a dummy EDAX binary UP1/2 file.
 
@@ -443,7 +459,9 @@ def edax_binary_file(tmpdir, request) -> Generator[TextIOWrapper, None, None]:
     is_hex : bool
     """
     # Unpack parameters
-    up_ver, (ny, nx), (sy, sx), dtype, ver, is_hex = request.param
+    up_ver, (ny, nx), (sy, sx), dtype, ver, is_hex = getattr(
+        request, "param", (1, (2, 3), (60, 60), "uint8", 2, False)
+    )
 
     if up_ver == 1:
         fname = tmpdir.join("dummy_edax_file.up1")
@@ -496,7 +514,7 @@ def oxford_binary_path() -> Generator[Path, None, None]:
     yield DATA_PATH / "oxford_binary"
 
 
-@pytest.fixture(params=[((2, 3), (60, 60), np.uint8, 2, False, True)])
+@pytest.fixture
 def oxford_binary_file(tmpdir, request) -> Generator[TextIOWrapper, None, None]:
     """Create a dummy Oxford Instruments' binary .ebsp file.
 
@@ -513,7 +531,9 @@ def oxford_binary_file(tmpdir, request) -> Generator[TextIOWrapper, None, None]:
     all_present : bool
     """
     # Unpack parameters
-    (nr, nc), (sr, sc), dtype, ver, compressed, all_present = request.param
+    (nr, nc), (sr, sc), dtype, ver, compressed, all_present = getattr(
+        request, "param", ((2, 3), (60, 60), np.uint8, 2, False, True)
+    )
 
     fname = tmpdir.join("dummy_oxford_file.ebsp")
     f = open(fname, mode="w")
@@ -579,7 +599,7 @@ def oxford_binary_file(tmpdir, request) -> Generator[TextIOWrapper, None, None]:
     yield f
 
 
-@pytest.fixture(params=["7.0"])
+@pytest.fixture
 def oxford_h5ebsd_file(tmpdir, request) -> Generator[Path, None, None]:
     """Yield the file path to a temporary H5OINA file.
 
@@ -587,9 +607,26 @@ def oxford_h5ebsd_file(tmpdir, request) -> Generator[Path, None, None]:
     -------------------------------
     version : "6.0" or "7.0"
     """
-    version = request.param
+    version: Literal["6.0", "7.0"] = getattr(request, "param", "7.0")
     fpath = tmpdir / "patterns.h5oina"
     create_dummy_oxford_h5ebsd_file(fpath, version=version)
+    yield fpath
+
+
+# -------------------------- ebsdsim formats ------------------------- #
+
+
+@pytest.fixture(scope="session")
+def ebsdsim_master_pattern_file(tmp_path_factory) -> Generator[Path, None, None]:
+    """Minimal ebsdsim Ni master pattern .npz file, created once per
+    session.
+    """
+    from kikuchipy.data._dummy_files.ebsdsim_master_pattern_npz import (
+        create_small_ebsdsim_npz_file,
+    )
+
+    fpath = tmp_path_factory.mktemp("ebsdsim") / "ni_master_pattern.npz"
+    create_small_ebsdsim_npz_file(fpath)
     yield fpath
 
 
@@ -620,9 +657,9 @@ def emsoft_ebsd_master_pattern_metadata() -> Generator[dict, None, None]:
     }
 
 
-@pytest.fixture(params=[["hemisphere", "energy", "height", "width"]])
+@pytest.fixture
 def emsoft_ebsd_master_pattern_axes_manager(request) -> Generator[dict, None, None]:
-    axes = request.param
+    axes = getattr(request, "param", ["hemisphere", "energy", "height", "width"])
     am = {
         "hemisphere": {
             "name": "hemisphere",

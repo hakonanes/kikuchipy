@@ -2,8 +2,8 @@
 Related projects
 ================
 
-This is a non-exhaustive list of related, open-source projects for analysis of
-EBSD data that users of kikuchipy might find useful:
+This is a non-exhaustive list of related, open-source projects for analysis of EBSD data
+that users of kikuchipy might find useful:
 
 - :doc:`HyperSpy <hyperspy:index>`: Python library with tools for multi-dimensional data
   analysis. kikuchipy extends this library for EBSD analysis.
@@ -21,6 +21,9 @@ EBSD data that users of kikuchipy might find useful:
 - :doc:`PyEBSDIndex <pyebsdindex:index>`: Python library for Hough/Radon based EBSD
   indexing.
   kikuchipy depends on this library for Hough indexing.
+- `ebsdsim <https://github.com/ZacharyVarley/ebsdsim>`__: Python library for fast
+  dynamical EBSD master pattern simulation.
+  kikuchipy can read master patterns generated with this software.
 - `OpenECCI <https://github.com/gorliks/OpenECCI>`__: GUI-based software for controlled
   Electron Channelling Contrast Imaging (ECCI) analysis of crystal defects in an SEM.
 - `MTEX <https://mtex-toolbox.github.io/>`__: MATLAB toolbox for analyzing and modeling
@@ -38,3 +41,8 @@ EBSD data that users of kikuchipy might find useful:
   digital image correlation data.
 - `pycotem <https://mompiou.github.io/pycotem/>`__: Python package for working with
   crystal orientations in transmission electron microscopy.
+- `ReciPro <https://seto77.github.io/ReciPro/>`__: Standalone multipurpose
+  crystallographic GUI software for Windows.
+  Has numerous features, including EBSD simulation.
+- `EMSphinxEBSD <https://emsphinx.readthedocs.io/en/latest/emsphinxebsd.html>`__: GUI
+  for indexing EBSD patterns using spherical harmonics, part of the EMSphinx software.

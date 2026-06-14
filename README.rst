@@ -37,8 +37,11 @@ library.
 .. |zenodo_doi| image:: https://zenodo.org/badge/doi/10.5281/zenodo.3597646.svg
    :target: https://doi.org/10.5281/zenodo.3597646
 
-.. |GPLv3| image:: https://img.shields.io/github/license/pyxem/kikuchipy
+.. |GPLv3| image:: https://img.shields.io/badge/license-GPLv3%2B-blue
    :target: https://opensource.org/license/GPL-3.0
+
+.. |BSD3| image:: https://img.shields.io/badge/license_(select_components)-BSD--3--Clause-blue
+   :target: https://opensource.org/license/BSD-3-Clause
 
 .. |GH-discuss| image:: https://img.shields.io/badge/GitHub-Discussions-green?logo=github
    :target: https://github.com/pyxem/kikuchipy/discussions
@@ -63,12 +66,19 @@ library.
 +----------------------+------------------------------------------------+
 | Citation             | |arxiv_doi| |zenodo_doi|                       |
 +----------------------+------------------------------------------------+
-| License              | |GPLv3|                                        |
+| License              | |GPLv3| |BSD3|                                 |
 +----------------------+------------------------------------------------+
 | Community            | |GH-discuss|                                   |
 +----------------------+------------------------------------------------+
 | Formatter            | |black|                                        |
 +----------------------+------------------------------------------------+
+
+kikuchipy is licensed under the `GNU General Public License v3+
+<https://opensource.org/license/GPL-3.0>`__.
+Select components are individually licensed under the `BSD 3-Clause License
+<https://opensource.org/license/BSD-3-Clause>`__, allowing reuse *of those components
+only* in both GPL and non-GPL projects.
+
 
 Documentation
 -------------
@@ -76,6 +86,7 @@ Documentation
 Refer to the `documentation <https://kikuchipy.org>`__ for detailed installation
 instructions, a user guide, and the
 `changelog <https://kikuchipy.org/en/stable/changelog.html>`__.
+
 
 Installation
 ------------
@@ -94,6 +105,7 @@ You can also visit `PyPI <https://pypi.org/project/kikuchipy>`__,
 
 Further details are available in the
 `installation guide <https://kikuchipy.org/en/stable/user/installation.html>`__.
+
 
 Citing kikuchipy
 ----------------
