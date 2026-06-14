@@ -69,7 +69,7 @@ dependencies = [
 
 [project.optional-dependencies]
 all = [
-    "ebsdsim @ git+https://github.com/hakonanes/ebsdsim@fix-1-multiprocessing-start-method-with-script",
+    "ebsdsim     >= 0.1.3",
     "ipywidgets",
     "IPython",
     "nlopt",
@@ -80,11 +80,7 @@ all = [
     "pyvista",
 ]
 doc = [
-    # TODO: Replace with patched version once it's released.
-    # Remember to remove the permission for Hatch to install
-    # dependencies from direct references.
-    # "ebsdsim             >= 0.1.4",
-    "ebsdsim @ git+https://github.com/hakonanes/ebsdsim@fix-1-multiprocessing-start-method-with-script",
+    "ebsdsim                      >= 0.1.3",
     "ipywidgets",
     "IPython",
     "ipympl",
@@ -153,9 +149,6 @@ include = ["src/kikuchipy"]
 [tool.hatch.build.targets.wheel.force-include]
 "tests/" = "kikuchipy/tests"
 "conftest.py" = "kikuchipy/conftest.py"
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
 [tool.coverage.report]
 precision = 2
