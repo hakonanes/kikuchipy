@@ -17,6 +17,8 @@
 ## along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+exclude: ^\.github/pull_request_template.md
+
 repos:
   # https://docs.astral.sh/ruff/configuration
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -35,6 +37,12 @@ repos:
     rev: v0.8.8
     hooks:
       - id: licenseheaders
+        name: licenseheaders (BSD-3-Clause)
+        files: ^src/kikuchipy/(_constants\.py|io/plugins/ebsdsim_master_pattern/)
+        args: ["-t", ".license_bsd.tmpl", "-cy", "-n", "kikuchipy", "-f"]
+      - id: licenseheaders
+        name: licenseheaders (GPL-3.0-or-later)
+        exclude: ^src/kikuchipy/(_constants\.py|io/plugins/ebsdsim_master_pattern/)
         args: ["-t", ".license.tmpl", "-cy", "-n", "kikuchipy", "-f"]
 
 # https://pre-commit.ci/#configuration

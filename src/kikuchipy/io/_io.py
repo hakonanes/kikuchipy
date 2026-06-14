@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2025 the kikuchipy developers
+# Copyright 2019-2026 the kikuchipy developers
 #
 # This file is part of kikuchipy.
 #
@@ -19,6 +19,7 @@
 
 import glob
 import importlib
+import logging
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -27,10 +28,19 @@ import h5py
 from hyperspy.misc.utils import find_subclasses
 from hyperspy.signal import BaseSignal
 import numpy as np
+import orix.crystal_map as ocm
 import yaml
 
 from kikuchipy.io._util import _ensure_directory, _get_input_bool, _overwrite
 import kikuchipy.signals
+
+if TYPE_CHECKING:  # pragma: no cover
+    from kikuchipy.signals.ebsd import EBSD, LazyEBSD
+    from kikuchipy.signals.ebsd_master_pattern import (
+        EBSDMasterPattern,
+        LazyEBSDMasterPattern,
+    )
+    from kikuchipy.signals.ecp_master_pattern import ECPMasterPattern
 
 PLUGINS: list = []
 WRITE_EXTENSIONS = []
@@ -45,13 +55,7 @@ for path in specification_paths:
                 WRITE_EXTENSIONS.append(ext)
 
 
-if TYPE_CHECKING:  # pragma: no cover
-    from kikuchipy.signals.ebsd import EBSD, LazyEBSD
-    from kikuchipy.signals.ebsd_master_pattern import (
-        EBSDMasterPattern,
-        LazyEBSDMasterPattern,
-    )
-    from kikuchipy.signals.ecp_master_pattern import ECPMasterPattern
+_logger = logging.getLogger(__name__)
 
 
 def load(
@@ -181,6 +185,15 @@ def _dict2signal(
             del md["Signal"]["record_by"]
         if "Signal" in md and "signal_type" in md["Signal"]:
             signal_type = md["Signal"]["signal_type"]
+
+    if "phase" in signal_dict and isinstance(signal_dict["phase"], dict):
+        try:
+            signal_dict["phase"] = ocm.Phase(**signal_dict["phase"])
+        except Exception as err:
+            _logger.debug(
+                "An error was raised when trying to parse phase information from the "
+                f"reader: {err}"
+            )
 
     signal = _assign_signal_subclass(
         signal_dimension=2,

@@ -17,16 +17,25 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""Reader of uncompressed EBSD patterns from a Oxford Instruments binary
-.ebsp file.
-
-Information about the file format was generously provided by Oxford
-Instruments.
+"""Creation of a small EBSD master pattern simulation using ebsdsim for
+testing and IO documentation.
 """
 
-import lazy_loader
+from pathlib import Path
 
-__getattr__, __dir__, __all__ = lazy_loader.attach_stub(__name__, __file__)
+import ebsdsim as es
 
 
-del lazy_loader
+def create_small_ebsdsim_npz_file(path: Path) -> None:
+    mp = es.master_pattern_from_cif(
+        "Ni.cif",
+        halfw=10,
+        voltage_kv=20.0,
+        sigma_deg=70.0,
+        omega_deg=0.0,
+        energy_binwidth_keV=10.0,
+        mc_backend="surrogate",
+        rank=3,
+        dmin=0.2,
+    )
+    es.save_master_pattern(mp, path)

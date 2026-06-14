@@ -1,0 +1,16 @@
+##
+## Copyright 2026 the kikuchipy developers
+##
+## SPDX-License-Identifier: BSD-3-Clause
+##
+
+name: ebsdsim_master_pattern
+description: >
+  Read support for a dynamical electron backscatter diffraction master
+  pattern simulated produced by the Python package 'ebsdsim' and stored
+  in a NumPy zipped archive *.npz file.
+file_extensions: ['npz']
+default_extension: 0
+writes: False
+manufacturer: ebsdsim
+footprints: []
