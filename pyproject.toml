@@ -9,6 +9,9 @@ name = "kikuchipy"
 authors = [{name = "kikuchipy developers"}]
 maintainers = [{name = "Håkon Wiik Ånes", email = "hwaanes@gmail.com"}]
 description = "Processing, simulating, and indexing of electron backscatter diffraction (EBSD) patterns"
+# TODO: Use once this syntax is picked up by 'pip show kikuchipy' after install
+# license-expression = "GPL-3.0-or-later AND BSD-3-Clause"
+# license-files = ["LICENSE", "LICENSE-BSD-3-Clause"]
 license = {file = "LICENSE"}
 readme = {file = "README.rst", content-type = "text/x-rst"}
 dynamic = ["version"]
@@ -23,6 +26,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering",
@@ -67,24 +71,27 @@ dependencies = [
 
 [project.optional-dependencies]
 all = [
+    "ebsdsim     >= 0.1.3",
     "ipywidgets",
     "IPython",
     "nlopt",
-    "pooch >= 1.3.0",
+    "pooch       >= 1.3.0",
     "psygnal",
     # Restriction due to https://github.com/USNavalResearchLaboratory/PyEBSDIndex/issues/80
     "pyebsdindex >= 0.3.9.2, != 0.3.10",
     "pyvista",
 ]
 doc = [
+    "ebsdsim                      >= 0.1.3",
     "ipywidgets",
     "IPython",
     "ipympl",
     "memory_profiler",
     "nbsphinx                     >= 0.7",
     # Restriction due to https://github.com/pyxem/kikuchipy/issues/739
-    "numpydoc != 1.9.0",
+    "numpydoc                     != 1.9.0",
     "nlopt",
+    "pooch                        >= 1.3.0",
     "pydata-sphinx-theme",
     "pyebsdindex                  >= 0.3.9.2, != 0.3.10",
     "pyvista",
@@ -98,23 +105,23 @@ doc = [
 ]
 tests = [
     "numpydoc",
-    "pooch",
+    "pooch                  >= 1.3.0",
     # TODO: Remove upper limit once PR 809 is merged and this is rebased on that.
-    "pytest                       >= 5.4, < 9.1",
+    "pytest                 >= 5.4, < 9.1",
     "pytest-benchmark",
     "pytest-rerunfailures",
     "pytest-xdist",
 ]
 coverage = [
-    "coverage                     >= 5.0",
-    "pytest-cov                   >= 2.8.1",
+    "coverage   >= 5.0",
+    "pytest-cov >= 2.8.1",
 ]
 dev = [
-    "black[jupyter]               >= 23.1",
+    "black[jupyter]                >= 23.1",
     "hatch",
     "isort",
     "outdated",
-    "pre-commit                   >= 1.16",
+    "pre-commit                    >= 1.16",
     "ruff",
     "kikuchipy[doc,tests,coverage]",
 ]
@@ -194,6 +201,7 @@ filterwarnings = [
 ]
 markers = [
     "weekly: mark test as running only weekly on CI",
+    "gpu: mark test as running only when wgpu has a GPU available",
 ]
 xfail_strict = true
 

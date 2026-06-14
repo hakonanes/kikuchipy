@@ -125,6 +125,9 @@ This is a list of core package dependencies:
 
 Some functionality requires optional dependencies:
 
+* `ebsdsim <https://github.com/ZacharyVarley/ebsdsim>`__: Dynamical EBSD simulations and
+  reading of simulations produced by `ebsdsim`.
+  Currently unavailable from conda-forge.
 * :doc:`ipywidgets <ipywidgets:index>`: Interactive widgets in Jupyter notebooks.
 * `IPython <https://ipython.readthedocs.io>`__: Interactive widgets in Jupyter
   notebooks.

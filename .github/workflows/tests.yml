@@ -97,7 +97,7 @@ jobs:
         if: ${{ contains(matrix.LABEL, 'minimum_requirement') == false && matrix.os == 'macos-latest' }}
         shell: bash
         run: |
-          pip install "pyebsdindex[gpu]" pyvista
+          pip install ipywidgets IPython "pooch>=1.3.0" psygnal "pyebsdindex[gpu]>=0.3.9.2,!=0.3.10" pyvista
 
       - name: Display Python, pip and package versions
         run: |
@@ -133,6 +133,14 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-latest' }}
         run: |
           pytest ${{ env.PYTEST_ARGS }}
+
+      - name: Run GPU tests on macOS
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          # TODO: Replace with patched version once it's released
+          pip install "ebsdsim @ git+https://github.com/hakonanes/ebsdsim@fix-1-multiprocessing-start-method-with-script"
+
+          pytest ${{ env.PYTEST_ARGS }} -m gpu --gpu
 
       - name: Generate line coverage
         run: |

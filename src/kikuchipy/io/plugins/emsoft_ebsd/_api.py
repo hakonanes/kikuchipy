@@ -17,8 +17,6 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""Reader of simulated EBSD patterns from an EMsoft HDF5 file."""
-
 import os
 from pathlib import Path
 

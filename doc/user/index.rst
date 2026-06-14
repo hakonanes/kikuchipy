@@ -24,4 +24,4 @@ User guide
     applications.rst
     open_datasets.rst
     related_projects.rst
-    License <https://github.com/pyxem/kikuchipy/blob/develop/LICENSE>
+    licensing.rst

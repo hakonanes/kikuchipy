@@ -17,8 +17,6 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""Reader and writer of EBSD data from a kikuchipy h5ebsd file."""
-
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING

@@ -17,8 +17,6 @@
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""Reader of EBSD calibration patterns from NORDIF files."""
-
 import os
 from pathlib import Path
 import warnings

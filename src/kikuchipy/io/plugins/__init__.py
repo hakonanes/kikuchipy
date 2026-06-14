@@ -1,4 +1,5 @@
-# Copyright 2019-2024 The kikuchipy developers
+#
+# Copyright 2019-2026 the kikuchipy developers
 #
 # This file is part of kikuchipy.
 #
@@ -14,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with kikuchipy. If not, see <http://www.gnu.org/licenses/>.
+#
 
 """Input/output plugins.
 
@@ -27,6 +29,7 @@
 
     bruker_h5ebsd
     ebsd_directory
+    ebsdsim_master_pattern
     edax_binary
     edax_h5ebsd
     emsoft_ebsd
