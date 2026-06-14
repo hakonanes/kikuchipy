@@ -183,8 +183,8 @@ def file_reader(
         idx += 1
 
     if n_energy > 1:
-        energy_offset = float(voltages[0])
-        energy_scale = float(np.diff(voltages).mean())
+        energy_scale = float(np.mean(np.diff(voltages)))
+        energy_offset = float(voltages[0]) - energy_scale / 2
         axes.append(
             {
                 "size": n_energy,

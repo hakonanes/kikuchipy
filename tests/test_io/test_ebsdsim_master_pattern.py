@@ -60,8 +60,9 @@ class TestEbsdsimMasterPatternReader:
         energy_axis = mp.axes_manager["energy"]
         assert energy_axis.size == 2
         assert energy_axis.units == "keV"
-        # Bins are at 15 and 5 keV; offset is the first bin, scale is the step.
-        np.testing.assert_allclose(energy_axis.axis, [15.0, 5.0], atol=1.0)
+        # Bins are at 20 and 10 keV; offset is the first bin, scale is
+        # the step
+        np.testing.assert_allclose(energy_axis.axis, [20.0, 10.0], atol=1.0)
 
     def test_signal_axes(self, ebsdsim_master_pattern_file):
         mp = kp.load(ebsdsim_master_pattern_file)
