@@ -88,7 +88,7 @@ def _lambert_to_sphere(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     parallel=True,
 )
 def _sphere_to_lambert(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
-    """Unit sphere (x, y, z) → Lambert square (X, Y) projection
+    """Vector (x, y, z) to Lambert (X, Y) projection
     :cite:`callahan2013dynamical`.
 
     Inverse of :func:`_lambert_to_sphere`.
