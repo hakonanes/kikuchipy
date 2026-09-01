@@ -13,25 +13,20 @@ its best to adhere to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>
 List entries are sorted in descending chronological order. Contributors to each release
 were listed in alphabetical order by first name until version 0.7.0.
 
-Unreleased
-==========
-
-Added
------
+0.13.1 (2026-09-02)
+===================
 
 Fixed
 -----
+- Energy axis of master patterns read from ebsdsim files written by ebsdsim >= 0.1.6 are
+  now correct.
+  Files written by older versions of ebsdsim still read correctly.
+  (`#818 <https://github.com/pyxem/kikuchipy/pull/818>`_)
 
 Changed
 -------
 - Increased minimal version of ebsdsim >= 0.1.4.
   (`#818 <https://github.com/pyxem/kikuchipy/pull/818>`_)
-
-Removed
--------
-
-Deprecated
-----------
 
 
 0.13.0 (2026-06-14)
