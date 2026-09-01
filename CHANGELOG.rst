@@ -24,6 +24,8 @@ Fixed
 
 Changed
 -------
+- Increased minimal version of ebsdsim >= 0.1.4.
+  (`#818 <https://github.com/pyxem/kikuchipy/pull/818>`_)
 
 Removed
 -------
